@@ -2,47 +2,56 @@
 
 function init() {
     if [[ "$1" == "" ]]; then
-        echo 'Invalid useage: ./autorecon.sh $ip'
+        echo 'Invalid usage: ./autorecon.sh $ip'
         exit 1
     fi
 
-    mkdir recon-$1
-    cd recon-$1
+    mkdir recon-"$1"
+    cd recon-"$1" || exit
     mkdir nmap
     mkdir ffuf
 }
 
-#  Starting of Nmap Scan ----------------------------------------------
+# Starting of Nmap Scan ----------------------------------------------
 function nmapFullPortScan() {
-    echo '[+] Initialised nmap full port scan...'
-    nmap -p- $1 | tee ./nmap/full-port-scan.txt &
+    echo '[+] Initialized nmap full port scan...'
+    nmap -p- "$1" | tee ./nmap/full-port-scan.txt
     echo '[-] Completed nmap full port scan'
 }
 
 function nmapGeneralScriptScan() {
-    echo '[+] Initialised nmap general script scan...'
-    nmap -sCSV $1 | tee ./nmap/general-script-scan.txt &
+    echo '[+] Initialized nmap general script scan...'
+    nmap -sC "$1" | tee ./nmap/general-script-scan.txt
     echo '[-] Completed nmap general script scan'
 }
 
 function nmapVulnScriptScan() {
-    echo '[+] Initialised nmap vuln script scan...'
-    nmap --script vuln $1 | tee ./nmap/vuln-script-scan.txt &
+    echo '[+] Initialized nmap vuln script scan...'
+    nmap --script vuln "$1" | tee ./nmap/vuln-script-scan.txt
     echo '[-] Completed nmap vuln script scan'
 }
 
 # Starting of FFUF Scan ----------------------------------------------
 function ffufScan() {
-    echo '[+] Initialised ffuf file scan...'
-    ffuf -u http://$1/FUZZ -w ./ffuf-wordlist.txt | tee ./ffuf/general-scan.txt &
-    echo '[-] Completed nmap vuln script scan'
+    echo '[+] Initialized ffuf file scan...'
+    ffuf -u "http://$1/FUZZ" -w ./ffuf-wordlist.txt | tee ./ffuf/general-scan.txt
+    echo '[-] Completed ffuf scan'
 }
 
+# Set a trap to handle script termination
+trap 'echo "Terminating..."; exit 1' SIGINT SIGTERM
 
-init
-# Nmap 
-nmapFullPortScan &
-nmapGeneralScriptScan &
-nmapVulnScriptScan & 
-# Fuff
-ffufScan &
+init "$1"
+
+# Nmap scans
+nmapFullPortScan "$1" &
+nmapGeneralScriptScan "$1" &
+nmapVulnScriptScan "$1" & 
+
+# FFUF scan
+ffufScan "$1" &
+
+# Wait for all background jobs to finish
+wait
+
+echo 'All scans completed.'
