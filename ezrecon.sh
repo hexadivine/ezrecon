@@ -30,10 +30,11 @@ function nmapVulnScriptScan() {
     nmap --script vuln $1 | tee ./nmap/vuln-script-scan.txt &
     echo '[-] Completed nmap vuln script scan'
 }
+
 # Starting of FFUF Scan ----------------------------------------------
-function ffufBigFileScan() {
-    echo '[+] Initialised ffuf big file scan...'
-    nmap --script vuln $1 | tee ./nmap/vuln-script-scan.txt &
+function ffufScan() {
+    echo '[+] Initialised ffuf file scan...'
+    ffuf -u http://$1/FUZZ -w ./ffuf-wordlist.txt | tee ./ffuf/general-scan.txt &
     echo '[-] Completed nmap vuln script scan'
 }
 
@@ -44,4 +45,4 @@ nmapFullPortScan &
 nmapGeneralScriptScan &
 nmapVulnScriptScan & 
 # Fuff
-
+ffufScan &
