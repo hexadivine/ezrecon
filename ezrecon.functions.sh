@@ -8,7 +8,7 @@ function initScript() {
 
     mkdir recon-"$ip"
     cd recon-"$ip" || exit
-    mkdir nmap ffuf 
+    mkdir 1-nmap 2-ffuf 
 }
 
 function nmapScan() {
@@ -17,14 +17,14 @@ function nmapScan() {
 
     echo "[+] Initialized nmap $scanName scan..."
 
-    echo -e 'nmap '$options' '$ip' -T5 \n' > "./nmap/$scanName.txt"
-    nmap $options $ip -T5 >> "./nmap/$scanName.txt"
+    echo -e 'nmap '$options' '$ip' -T5 \n' > "./1-nmap/$scanName.txt"
+    nmap $options $ip -T5 >> "./1-nmap/$scanName.txt"
 
     echo "[-] Completed nmap $scanName scan"
 }
 
 function getOpenPortList() {
-    local portList=$(cat ./nmap/1-full-port-scan.txt | grep -E "^[0-9]+/.*open" | awk '{print $1}' | cut -d'/' -f1 | tr '\n' ',')
+    local portList=$(cat ./1-nmap/1-full-port-scan.txt | grep -E "^[0-9]+/.*open" | awk '{print $1}' | cut -d'/' -f1 | tr '\n' ',')
     portList="${portList%,}"
     echo $portList
 }
@@ -35,7 +35,7 @@ function ffufScan() {
 
     echo "[+] Initialized nmap $scanName scan..."
 
-    echo "ffuf -u http://$ip/FUZZ -w $wordlist " > "./nmap/$scanName.txt"
+    echo "ffuf -u http://$ip/FUZZ -w $wordlist " > "./1-nmap/$scanName.txt"
     ffuf -u "http://$ip/FUZZ" -w $wordlist | tee -a "./ffuf/$scanName.txt"
 
     echo "[-] Completed nmap $scanName scan"
