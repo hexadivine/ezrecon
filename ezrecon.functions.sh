@@ -24,7 +24,7 @@ function nmapScan() {
 }
 
 function getOpenPortList() {
-    local portList=$(cat ./nmap/full-port-scan.txt | grep -e "^[0-9]*/.*open" | awk '{print $1}' | cut -d'/' -f1 | tr '\n' ',')
+    local portList=$(cat ./nmap/1-full-port-scan.txt | grep -E "^[0-9]+/.*open" | awk '{print $1}' | cut -d'/' -f1 | tr '\n' ',')
     portList="${portList%,}"
     echo $portList
 }
