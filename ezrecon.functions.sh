@@ -24,9 +24,17 @@ function nmapScan() {
 }
 
 function getOpenPortList() {
-    local portList=$(cat ./1-nmap/1-full-port-scan.txt | grep -E "^[0-9]+/.*open" | awk '{print $1}' | cut -d'/' -f1 | tr '\n' ',')
+    local fileName=$1
+    local portList=$(cat ./1-nmap/$fileName.txt | grep -E "^[0-9]+/.*open" | awk '{print $1}' | cut -d'/' -f1 | tr '\n' ',')
     portList="${portList%,}"
     echo $portList
+}
+
+function nmapRemainingFullPortScan() {
+    local knownPorts=$1
+    nmapScan "6-full-port-scan" "-v -p-"
+    openPorts=$(getOpenPortList "1-common-ports-scan")
+    echo $openPorts
 }
 
 function ffufScan() {
