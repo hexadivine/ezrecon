@@ -56,7 +56,6 @@ function nmapRemainingFullPortScan() {
     nmapScan "10-new-remaining-aggressive-scan" "-A -p$newPorts" &
     nmapScan "11-new-remaining-version-scan" "-sV -p$newPorts" &
 
-
 }
 
 function ffufScan() {
@@ -65,8 +64,8 @@ function ffufScan() {
 
     echo "[+] Initialized nmap $scanName scan..."
 
-    echo "ffuf -u http://$ip/FUZZ -w $wordlist " > "./1-nmap/$scanName.txt"
-    ffuf -u "http://$ip/FUZZ" -w $wordlist | tee -a "./ffuf/$scanName.txt"
+    echo "ffuf -u http://$ip/FUZZ -w $wordlist " > "./2-ffuf/$scanName.txt"
+    ffuf -u "http://$ip/FUZZ" -w $wordlist -o "./2-ffuf/$scanName.txt" -v  > /dev/null 2>&1
 
     echo "[-] Completed nmap $scanName scan"
 }
