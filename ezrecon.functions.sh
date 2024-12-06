@@ -7,8 +7,10 @@ function initScript() {
     fi
 
     mkdir recon-"$ip"
-    cd recon-"$ip" || exit
-    mkdir 1-nmap 2-ffuf 
+    cd recon-"$ip"
+    mkdir -p 1-nmap/ports 2-ffuf 
+
+    gnome-terminal -- ranger .
 }
 
 function nmapScan() {
@@ -19,6 +21,18 @@ function nmapScan() {
 
     echo -e 'nmap '$options' '$ip' -T5 \n' > "./1-nmap/$scanName.txt"
     nmap $options $ip -T5 >> "./1-nmap/$scanName.txt"
+
+    echo "[-] Completed nmap $scanName scan"
+}
+
+function nmapPortScriptScan() {
+    local portNum=$1
+    local portName=$2
+
+    echo "[+] Initialized nmap script scan for $portName on port $portName..."
+
+    echo -e 'nmap --script="'$portName'* not auth and not broadcast and not brute and not dos and not exploit and not external and not fuzzer and not intrusive and not malware" -p'$portNum' '$ip' -T5 \n' > "./1-nmap/ports/$portName.txt"
+    nmap --script="$portName* and not auth and not broadcast and not brute and not dos and not exploit and not external and not fuzzer and not intrusive and not malware" -p"$portNum"  $ip -T5 >> "./1-nmap/ports/$portName.txt"
 
     echo "[-] Completed nmap $scanName scan"
 }
@@ -51,10 +65,10 @@ function nmapRemainingFullPortScan() {
     local newPorts=$(cat "./1-nmap/7-new-ports.txt" | tr '\n' ',')
     newPorts="${newPorts%,}"
 
-    nmapScan "8-new-remaining-general-scan" "-sCSV -p$newPorts" &
-    nmapScan "9-new-remaining-vul-scan" "--script vuln -p$newPorts" &
-    nmapScan "10-new-remaining-aggressive-scan" "-A -p$newPorts" &
-    nmapScan "11-new-remaining-version-scan" "-sV -p$newPorts" &
+    nmapScan "8-new-ports-general-scan" "-sCV -p$newPorts" &
+    nmapScan "9-new-ports-script-scan" "--script default,discovery,safe,version,vuln -p$newPorts" &
+    nmapScan "10-new-ports-aggressive-scan" "-A -p$newPorts" &
+    # nmapScan "11-new-remaining-version-scan" "-sV -p$newPorts" &
 
 }
 
@@ -62,10 +76,10 @@ function ffufScan() {
     local scanName=$1
     local wordlist=$2
 
-    echo "[+] Initialized nmap $scanName scan..."
+    echo "[+] Initialized ffuf $scanName scan..."
 
-    echo "ffuf -u http://$ip/FUZZ -w $wordlist " > "./2-ffuf/$scanName.txt"
-    ffuf -u "http://$ip/FUZZ" -w $wordlist -o "./2-ffuf/$scanName.txt" -v  > /dev/null 2>&1
+    echo -e "ffuf -u http://$ip/FUZZ -w $wordlist \n" > "./2-ffuf/$scanName.txt"
+    ffuf -u "http://$ip/FUZZ" -w $wordlist -s -mc 200-299 >> "./2-ffuf/$scanName.txt" 
 
     echo "[-] Completed nmap $scanName scan"
 }

@@ -11,12 +11,23 @@ echo '[*] Enumerating open ports'
 nmapScan "1-common-ports-scan" "-v" 
 openPorts=$(getOpenPortList "1-common-ports-scan")
 
-nmapScan "2-general-scan" "-sCSV -p$openPorts" &
-nmapScan "3-vul-scan" "--script vuln -p$openPorts" &
-nmapScan "4-aggressive-scan" "-A -p$openPorts" &
-nmapScan "5-version-scan" "-sV -p$openPorts" &
+echo '[!] open ports are: '$openPorts
 
-nmapRemainingFullPortScan $openPorts &
+nmapScan "2-general-scan" "-sCV -p$openPorts" &
+nmapScan "3-vuln-scan" "--script vuln -p$openPorts" &
+nmapScan "4-aggressive-scan" "-A -p$openPorts" &
+
+if [[ ','$openPorts',' =~ ',21,' ]]; then
+    nmapPortScriptScan '21' 'ftp' &
+fi
+if [[ ','$openPorts',' =~ ',22,' ]]; then
+    nmapPortScriptScan '22' 'ssh' &
+fi
+if [[ ','$openPorts',' =~ ',80,' ]]; then
+    nmapPortScriptScan '80' 'http' &
+fi
+
+nmapRemainingFullPortScan $openPorts 
 
 # FFUF scan -----------------------------------------------------------------
 
