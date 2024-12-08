@@ -8,7 +8,7 @@ function initScript() {
 
     mkdir recon-"$ip"
     cd recon-"$ip"
-    mkdir -p 1-nmap/ports 2-ffuf 3-nikto
+    mkdir -p 1-nmap/ports
 
     gnome-terminal -- ranger .
 }

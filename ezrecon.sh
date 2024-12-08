@@ -3,12 +3,12 @@ source ./ezrecon.functions.sh
 
 # Initial setup -----------------------------------------------------------------
 
+ip=$1
+initScript $ip
 cleanup() {
     kill 0 
 }
 trap cleanup EXIT SIGINT SIGTERM
-ip=$1
-initScript $ipnmapScan "3-vuln-scan" "--script vuln -p$openPorts" &
 
 # Nmap scan -----------------------------------------------------------------
 
@@ -38,15 +38,21 @@ nmapRemainingFullPortScan $openPorts &
 # FFUF scan -----------------------------------------------------------------
 
 if [[ ','$openPorts',' =~ ',80,' ]]; then
+    mkdir '2-ffuf'
     echo '[*] Enumerating dirs,files,dns on the webserver '
-    ffuf -u "http://$ip/FUZZ" -w "./../wordlist/dirs.txt" -s -mc 200-299 >> "./2-ffuf/dir.txt" &
+
+    echo -e 'ffuf -u "http://'$ip'/FUZZ" -w "./../wordlist/dirs.txt" -s -mc 200-299 \n' > "./2-ffuf/dirs.txt"
+    ffuf -u "http://$ip/FUZZ" -w "./../wordlist/dirs.txt" -s -mc 200-299 >> "./2-ffuf/dirs.txt" &
+    
+    echo -e 'ffuf -u "http://'$ip'" -w "./../wordlist/subdomains.txt" -H "Host: FUZZ.'$ip'" -fc 301 -s \n' > "./2-ffuf/subdomains.txt" 
     ffuf -u "http://$ip" -w "./../wordlist/subdomains.txt" -H "Host: FUZZ.$ip" -fc 301 -s >> "./2-ffuf/subdomains.txt" &
 fi
 
 # Nikto scan -----------------------------------------------------------------
 
 if [[ ','$openPorts',' =~ ',80,' ]]; then
-    nikto -h $ip > './3-nikto/scan.txt' &
+    mkdir '3-nikto'
+    nikto -h $ip -output './3-nikto/scan.txt' &
 fi
 
 #  -----------------------------------------------------------------
