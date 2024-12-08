@@ -8,7 +8,7 @@ function initScript() {
 
     mkdir recon-"$ip"
     cd recon-"$ip"
-    mkdir -p 1-nmap/ports 2-ffuf 
+    mkdir -p 1-nmap/ports 2-ffuf 3-nikto
 
     gnome-terminal -- ranger .
 }
@@ -66,20 +66,8 @@ function nmapRemainingFullPortScan() {
     newPorts="${newPorts%,}"
 
     nmapScan "8-new-ports-general-scan" "-sCV -p$newPorts" &
-    nmapScan "9-new-ports-script-scan" "--script default,discovery,safe,version,vuln -p$newPorts" &
-    nmapScan "10-new-ports-aggressive-scan" "-A -p$newPorts" &
+    # nmapScan "9-new-ports-script-scan" "--script default,discovery,safe,version,vuln -p$newPorts" &
+    nmapScan "9-new-ports-aggressive-scan" "-A -p$newPorts" &
     # nmapScan "11-new-remaining-version-scan" "-sV -p$newPorts" &
 
-}
-
-function ffufScan() {
-    local scanName=$1
-    local wordlist=$2
-
-    echo "[+] Initialized ffuf $scanName scan..."
-
-    echo -e "ffuf -u http://$ip/FUZZ -w $wordlist \n" > "./2-ffuf/$scanName.txt"
-    ffuf -u "http://$ip/FUZZ" -w $wordlist -s -mc 200-299 >> "./2-ffuf/$scanName.txt" 
-
-    echo "[-] Completed nmap $scanName scan"
 }
