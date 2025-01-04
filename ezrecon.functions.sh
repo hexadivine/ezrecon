@@ -6,11 +6,11 @@ function initScript() {
         exit 1
     fi
 
-    mkdir recon-"$ip"
-    cd recon-"$ip"
+    mkdir /tmp/recon-"$ip"
+    cd /tmp/recon-"$ip"
     mkdir -p 1-nmap/ports
 
-    gnome-terminal -- ranger .
+    gnome-terminal -- ranger . &
 }
 
 function nmapScan() {
@@ -19,8 +19,8 @@ function nmapScan() {
 
     echo "[+] Initialized nmap $scanName scan..."
 
-    echo -e 'nmap '$options' '$ip' -T5 \n' > "./1-nmap/$scanName.txt"
-    nmap $options $ip -T5 >> "./1-nmap/$scanName.txt"
+    echo -e 'nmap  -Pn '$options' '$ip' -T5 \n' > "./1-nmap/$scanName.txt"
+    nmap $options $ip -Pn -T5 >> "./1-nmap/$scanName.txt"
 
     echo "[-] Completed nmap $scanName scan"
 }
@@ -31,8 +31,8 @@ function nmapPortScriptScan() {
 
     echo "[+] Initialized nmap script scan for $portName on port $portName..."
 
-    echo -e 'nmap --script="'$portName'* not auth and not broadcast and not brute and not dos and not exploit and not external and not fuzzer and not intrusive and not malware" -p'$portNum' '$ip' -T5 \n' > "./1-nmap/ports/$portName.txt"
-    nmap --script="$portName* and not auth and not broadcast and not brute and not dos and not exploit and not external and not fuzzer and not intrusive and not malware" -p"$portNum"  $ip -T5 >> "./1-nmap/ports/$portName.txt"
+    echo -e 'nmap -Pn --script="'$portName'* not auth and not broadcast and not brute and not dos and not exploit and not external and not fuzzer and not intrusive and not malware" -p'$portNum' '$ip' -T5 \n' > "./1-nmap/ports/$portName.txt"
+    nmap -Pn --script="$portName* and not auth and not broadcast and not brute and not dos and not exploit and not external and not fuzzer and not intrusive and not malware" -p"$portNum"  $ip -T5 >> "./1-nmap/ports/$portName.txt"
 
     echo "[-] Completed nmap $scanName scan"
 }
